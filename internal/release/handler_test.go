@@ -130,6 +130,11 @@ func TestLandingPageIsServed(t *testing.T) {
 	if !strings.Contains(response.Body.String(), "HUSHI") {
 		t.Fatal("landing page does not contain HUSHI")
 	}
+	for _, want := range []string{"id=\"install-command\"", "id=\"copy-install\"", "curl -fsSL https://hushi.icooler.opik.net/install.sh | bash"} {
+		if !strings.Contains(response.Body.String(), want) {
+			t.Fatalf("landing page does not contain %q", want)
+		}
+	}
 }
 
 func TestInstallerIsServed(t *testing.T) {
@@ -140,8 +145,10 @@ func TestInstallerIsServed(t *testing.T) {
 	if response.Code != http.StatusOK {
 		t.Fatalf("installer status = %d, want %d", response.Code, http.StatusOK)
 	}
-	if !strings.Contains(response.Body.String(), "HUSHI_RELEASE_BASE_URL") {
-		t.Fatal("installer does not contain the release endpoint")
+	for _, want := range []string{"HUSHI_RELEASE_BASE_URL", "HUSHI_YES", "HUSHI_AUTO_UPDATE", "Update it now?", "service refresh", "config set auto-update"} {
+		if !strings.Contains(response.Body.String(), want) {
+			t.Fatalf("installer does not contain %q", want)
+		}
 	}
 }
 

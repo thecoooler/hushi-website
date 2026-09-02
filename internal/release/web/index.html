@@ -28,7 +28,7 @@
           <span class="download-arrow" aria-hidden="true">↗</span>
         </a>
         <p class="download-meta" id="release-meta" role="status">Проверяю последний релиз…</p>
-        <a class="server-install" href="/install.sh">Установить сервер на Linux / macOS <span aria-hidden="true">↗</span></a>
+        <a class="server-install" href="#server-install">Установить сервер на Linux / macOS <span aria-hidden="true">↓</span></a>
       </div>
 
       <div class="release-card" role="region" aria-label="Информация о текущем релизе">
@@ -41,6 +41,20 @@
           <span>SHA-256</span><strong class="hash" id="card-hash">—</strong>
         </div>
         <div class="card-footer">SECURE DELIVERY / PUBLIC DOWNLOAD</div>
+      </div>
+    </section>
+
+    <section class="server-card" id="server-install" aria-labelledby="server-install-title">
+      <div>
+        <p class="eyebrow"><span class="signal-dot"></span> серверный канал</p>
+        <h2 id="server-install-title">Один терминал.<br><em>Всегда актуальный.</em></h2>
+        <p class="server-copy">Команда сама определяет: это первая установка или обновление. Перед изменениями installer спросит подтверждение.</p>
+      </div>
+      <div class="command-panel">
+        <div class="command-label">Linux / macOS</div>
+        <code id="install-command">curl -fsSL https://hushi.icooler.opik.net/install.sh | bash</code>
+        <button class="copy-command" id="copy-install" type="button">Скопировать команду</button>
+        <p class="copy-status" id="copy-status" role="status" aria-live="polite">По умолчанию автообновления выключены — installer предложит включить их.</p>
       </div>
     </section>
 

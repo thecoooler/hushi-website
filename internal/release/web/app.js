@@ -6,6 +6,11 @@ const buildEl = document.querySelector("#card-build");
 const sizeEl = document.querySelector("#card-size");
 const hashEl = document.querySelector("#card-hash");
 const statusEl = document.querySelector("#card-status");
+const installCommandEl = document.querySelector("#install-command");
+const copyInstallButton = document.querySelector("#copy-install");
+const copyStatusEl = document.querySelector("#copy-status");
+
+const installCommand = "curl -fsSL https://hushi.icooler.opik.net/install.sh | bash";
 
 function formatBytes(value) {
   if (!Number.isFinite(value) || value <= 0) return "—";
@@ -39,3 +44,15 @@ async function loadRelease() {
 }
 
 loadRelease();
+
+copyInstallButton?.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(installCommand);
+    copyInstallButton.textContent = "Команда скопирована";
+    copyStatusEl.textContent = "Вставьте её в терминал. Installer спросит подтверждение и настройки автообновления.";
+  } catch {
+    copyStatusEl.textContent = "Не удалось скопировать автоматически — выделите команду вручную.";
+  }
+});
+
+if (installCommandEl) installCommandEl.textContent = installCommand;

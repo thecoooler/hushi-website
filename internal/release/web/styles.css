@@ -58,6 +58,19 @@ h1 em { color: var(--mint); font-style: normal; }
 .server-install:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .server-install:focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; }
 
+.server-card { display: grid; grid-template-columns: minmax(0, .9fr) minmax(320px, 1.1fr); gap: clamp(28px, 7vw, 100px); align-items: center; margin: 0 0 72px; padding: clamp(28px, 5vw, 52px); background: rgba(18, 36, 49, .72); border: 1px solid var(--line); border-radius: 30px 3px 30px 3px; }
+.server-card .eyebrow { margin-bottom: 18px; }
+.server-card h2 { margin: 0; color: var(--ink); font-size: clamp(31px, 5vw, 56px); line-height: .95; letter-spacing: -.065em; }
+.server-card h2 em { color: var(--mint); font-style: normal; }
+.server-copy { max-width: 410px; margin: 22px 0 0; color: var(--muted); line-height: 1.55; }
+.command-panel { padding: 22px; background: var(--night); border: 1px solid var(--line); border-radius: 3px 18px 3px 18px; }
+.command-label { margin-bottom: 14px; color: var(--amber); font: 10px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; }
+.command-panel code { display: block; overflow-x: auto; padding: 16px; color: var(--mint); background: rgba(157, 232, 206, .06); font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
+.copy-command { margin-top: 14px; padding: 11px 14px; color: var(--night); background: var(--mint); border: 1px solid var(--mint); border-radius: 2px 10px 2px 10px; cursor: pointer; font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.copy-command:hover { background: #c2f5e5; }
+.copy-command:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+.copy-status { min-height: 34px; margin: 14px 0 0; color: var(--muted); font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
 .release-card { position: relative; overflow: hidden; padding: 24px; background: linear-gradient(145deg, rgba(18, 36, 49, .98), rgba(13, 28, 39, .94)); border: 1px solid var(--line); border-radius: 3px 30px 3px 30px; box-shadow: 18px 22px 0 rgba(157, 232, 206, .06); }
 .release-card::after { position: absolute; right: -55px; bottom: -58px; width: 170px; height: 170px; content: ""; border: 1px solid rgba(157,232,206,.22); border-radius: 50%; box-shadow: 0 0 0 16px rgba(157,232,206,.03), 0 0 0 34px rgba(157,232,206,.025); }
 .card-top { display: flex; justify-content: space-between; color: var(--muted); }
@@ -76,6 +89,7 @@ h1 em { color: var(--mint); font-style: normal; }
   h1 { font-size: clamp(58px, 18vw, 88px); }
   .lede { font-size: 16px; }
   .release-card { max-width: none; }
+  .server-card { display: flex; flex-direction: column; align-items: stretch; margin-bottom: 54px; padding: 25px; }
   .footer { flex-direction: column; gap: 7px; }
   .nav-note { display: none; }
 }

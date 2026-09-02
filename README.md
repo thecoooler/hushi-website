@@ -78,8 +78,21 @@ curl --fail-with-body \
 ```
 
 The installer is available at `/install.sh`; it selects the platform binary,
-checks its SHA-256 against `checksums.txt`, installs `hushi`, and runs
-`hushi setup`.
+checks its SHA-256 against `checksums.txt`, and installs `hushi`. The same
+command detects an existing installation and performs an update after asking
+for confirmation. It asks separately whether hourly automatic server updates
+should be enabled. For unattended use, set `HUSHI_YES=1` and explicitly set
+`HUSHI_AUTO_UPDATE=on` or `HUSHI_AUTO_UPDATE=off`.
+
+The landing page shows the canonical command and copies it to the clipboard:
+
+```sh
+curl -fsSL https://hushi.icooler.opik.net/install.sh | bash
+```
+
+The installer keeps the existing listen address and device authorizations when
+updating. Automatic updates are verified using the release metadata's size
+and SHA-256 before the managed service is restarted.
 
 ## Production notes
 
