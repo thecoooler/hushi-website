@@ -42,9 +42,21 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.download(w, r)
 	case "/api/v1/releases":
 		h.upload(w, r)
+	case "/install.sh":
+		h.installScript(w, r)
 	default:
 		h.site.ServeHTTP(w, r)
 	}
+}
+
+func (h *Handler) installScript(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w, http.MethodGet)
+		return
+	}
+	// Keep one canonical, checksum-verifying installer in the server repo while
+	// making the public landing domain a convenient curl entry point.
+	http.Redirect(w, r, "https://raw.githubusercontent.com/thecoooler/hushi-server/main/install.sh", http.StatusFound)
 }
 
 func (h *Handler) health(w http.ResponseWriter, r *http.Request) {

@@ -132,6 +132,19 @@ func TestLandingPageIsServed(t *testing.T) {
 	}
 }
 
+func TestInstallerRedirectsToCanonicalScript(t *testing.T) {
+	_, handler := testHandler(t, "secret")
+	request := httptest.NewRequest(http.MethodGet, "/install.sh", nil)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusFound {
+		t.Fatalf("installer status = %d, want %d", response.Code, http.StatusFound)
+	}
+	if got := response.Header().Get("Location"); got != "https://raw.githubusercontent.com/thecoooler/hushi-server/main/install.sh" {
+		t.Fatalf("installer location = %q", got)
+	}
+}
+
 func testHandler(t *testing.T, token string) (*Store, http.Handler) {
 	t.Helper()
 	store, err := NewStore(t.TempDir(), 1<<20)
