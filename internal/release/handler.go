@@ -8,8 +8,11 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //go:embed web/*
@@ -17,6 +20,7 @@ var webFiles embed.FS
 
 type Handler struct {
 	store       *Store
+	serverStore *ServerStore
 	uploadToken string
 	site        http.Handler
 }
@@ -29,7 +33,11 @@ func NewHandler(store *Store, uploadToken string) (*Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Handler{store: store, uploadToken: strings.TrimSpace(uploadToken), site: site}, nil
+	serverStore, err := NewServerStore(filepath.Join(store.dir, "server"), 128<<20)
+	if err != nil {
+		return nil, err
+	}
+	return &Handler{store: store, serverStore: serverStore, uploadToken: strings.TrimSpace(uploadToken), site: site}, nil
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +52,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.upload(w, r)
 	case "/install.sh":
 		h.installScript(w, r)
+	case "/api/v1/server/releases/latest":
+		h.latestServer(w, r)
+	case "/api/v1/server/releases":
+		h.uploadServer(w, r)
 	default:
+		const serverAssetPrefix = "/api/v1/server/releases/latest/"
+		if strings.HasPrefix(r.URL.Path, serverAssetPrefix) {
+			h.downloadServer(w, r, strings.TrimPrefix(r.URL.Path, serverAssetPrefix))
+			return
+		}
 		h.site.ServeHTTP(w, r)
 	}
 }
@@ -54,9 +71,80 @@ func (h *Handler) installScript(w http.ResponseWriter, r *http.Request) {
 		methodNotAllowed(w, http.MethodGet)
 		return
 	}
-	// Keep one canonical, checksum-verifying installer in the server repo while
-	// making the public landing domain a convenient curl entry point.
-	http.Redirect(w, r, "https://raw.githubusercontent.com/thecoooler/hushi-server/main/install.sh", http.StatusFound)
+	h.site.ServeHTTP(w, r)
+}
+
+func (h *Handler) latestServer(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w, http.MethodGet)
+		return
+	}
+	meta, err := h.serverStore.Current()
+	if errors.Is(err, ErrNoServerRelease) {
+		writeError(w, http.StatusNotFound, "no_server_release", "No server release has been published")
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "server_release_unavailable", "Latest server release is unavailable")
+		return
+	}
+	writeJSON(w, http.StatusOK, meta)
+}
+
+func (h *Handler) downloadServer(w http.ResponseWriter, r *http.Request, filename string) {
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		methodNotAllowed(w, "GET, HEAD")
+		return
+	}
+	asset, file, err := h.serverStore.OpenLatest(filename)
+	if errors.Is(err, ErrNoServerRelease) || errors.Is(err, os.ErrNotExist) {
+		writeError(w, http.StatusNotFound, "server_asset_not_found", "Server asset is unavailable")
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "server_release_unavailable", "Server asset is unavailable")
+		return
+	}
+	defer file.Close()
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", asset.Filename))
+	w.Header().Set("Cache-Control", "no-cache")
+	http.ServeContent(w, r, asset.Filename, time.Time{}, file)
+}
+
+func (h *Handler) uploadServer(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		methodNotAllowed(w, http.MethodPost)
+		return
+	}
+	if h.uploadToken == "" {
+		writeError(w, http.StatusServiceUnavailable, "upload_disabled", "Release uploads are not configured")
+		return
+	}
+	if !hasBearerToken(r, h.uploadToken) {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "A valid release upload token is required")
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, h.serverStore.MaxBytes()+2<<20)
+	if err := r.ParseMultipartForm(4 << 20); err != nil {
+		writeError(w, http.StatusRequestEntityTooLarge, "invalid_upload", "The server release is too large or malformed")
+		return
+	}
+	if r.MultipartForm != nil {
+		defer r.MultipartForm.RemoveAll()
+	}
+	version := strings.TrimSpace(r.FormValue("version"))
+	files := r.MultipartForm.File["asset"]
+	if len(files) == 0 {
+		writeError(w, http.StatusBadRequest, "missing_assets", "Repeated multipart field asset is required")
+		return
+	}
+	meta, err := h.serverStore.Publish(version, files)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "publish_failed", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, meta)
 }
 
 func (h *Handler) health(w http.ResponseWriter, r *http.Request) {

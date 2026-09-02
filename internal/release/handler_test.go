@@ -132,16 +132,60 @@ func TestLandingPageIsServed(t *testing.T) {
 	}
 }
 
-func TestInstallerRedirectsToCanonicalScript(t *testing.T) {
+func TestInstallerIsServed(t *testing.T) {
 	_, handler := testHandler(t, "secret")
 	request := httptest.NewRequest(http.MethodGet, "/install.sh", nil)
 	response := httptest.NewRecorder()
 	handler.ServeHTTP(response, request)
-	if response.Code != http.StatusFound {
-		t.Fatalf("installer status = %d, want %d", response.Code, http.StatusFound)
+	if response.Code != http.StatusOK {
+		t.Fatalf("installer status = %d, want %d", response.Code, http.StatusOK)
 	}
-	if got := response.Header().Get("Location"); got != "https://raw.githubusercontent.com/thecoooler/hushi-server/main/install.sh" {
-		t.Fatalf("installer location = %q", got)
+	if !strings.Contains(response.Body.String(), "HUSHI_RELEASE_BASE_URL") {
+		t.Fatal("installer does not contain the release endpoint")
+	}
+}
+
+func TestServerReleaseUploadLatestAndDownload(t *testing.T) {
+	_, handler := testHandler(t, "upload-secret")
+	server := httptest.NewServer(handler)
+	t.Cleanup(server.Close)
+
+	response := uploadServer(t, server.URL, "upload-secret", "0.3.0", map[string][]byte{
+		"hushi-linux-amd64": []byte("linux-binary"),
+		"checksums.txt":     []byte("checksum  hushi-linux-amd64\n"),
+	})
+	if response.StatusCode != http.StatusCreated {
+		t.Fatalf("server upload status = %d %s", response.StatusCode, response.Body)
+	}
+	var published ServerMetadata
+	decodeJSON(t, response, &published)
+	if published.Version != "0.3.0" || published.Assets["hushi-linux-amd64"].SizeBytes != 12 {
+		t.Fatalf("unexpected server metadata: %+v", published)
+	}
+
+	latest, err := http.Get(server.URL + "/api/v1/server/releases/latest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer latest.Body.Close()
+	if latest.StatusCode != http.StatusOK {
+		t.Fatalf("server latest status = %d", latest.StatusCode)
+	}
+
+	download, err := http.Get(server.URL + "/api/v1/server/releases/latest/hushi-linux-amd64")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer download.Body.Close()
+	if download.StatusCode != http.StatusOK {
+		t.Fatalf("server download status = %d", download.StatusCode)
+	}
+	body, err := io.ReadAll(download.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != "linux-binary" || download.ContentLength != 12 {
+		t.Fatalf("server download body/size = %q/%d", body, download.ContentLength)
 	}
 }
 
@@ -182,6 +226,38 @@ func upload(t *testing.T, base, token, version, versionCode, notes string, apk [
 		t.Fatal(err)
 	}
 	request, err := http.NewRequest(http.MethodPost, base+"/api/v1/releases", &body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return response
+}
+
+func uploadServer(t *testing.T, base, token, version string, assets map[string][]byte) *http.Response {
+	t.Helper()
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	if err := writer.WriteField("version", version); err != nil {
+		t.Fatal(err)
+	}
+	for filename, content := range assets {
+		part, err := writer.CreateFormFile("asset", filename)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := part.Write(content); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	request, err := http.NewRequest(http.MethodPost, base+"/api/v1/server/releases", &body)
 	if err != nil {
 		t.Fatal(err)
 	}
