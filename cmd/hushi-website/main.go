@@ -20,6 +20,11 @@ import (
 
 const defaultMaxAPKBytes = int64(512 << 20)
 
+const (
+	serverReadTimeout  = 10 * time.Minute
+	serverWriteTimeout = 10 * time.Minute
+)
+
 func main() {
 	fs := flag.NewFlagSet("hushi-website", flag.ExitOnError)
 	addr := fs.String("addr", envOr("HUSHI_WEBSITE_ADDR", ":8080"), "listen address")
@@ -44,8 +49,8 @@ func main() {
 		Addr:              *addr,
 		Handler:           handler,
 		ReadHeaderTimeout: 10 * time.Second,
-		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      30 * time.Second,
+		ReadTimeout:       serverReadTimeout,
+		WriteTimeout:      serverWriteTimeout,
 		IdleTimeout:       90 * time.Second,
 		MaxHeaderBytes:    16 << 10,
 	}
