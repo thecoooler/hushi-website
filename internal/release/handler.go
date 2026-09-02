@@ -73,8 +73,8 @@ func (h *Handler) latest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) download(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		methodNotAllowed(w, http.MethodGet)
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		methodNotAllowed(w, "GET, HEAD")
 		return
 	}
 	meta, file, err := h.store.OpenLatest()

@@ -47,10 +47,11 @@ body::before {
 h1 { max-width: 660px; margin: 0; font-size: clamp(56px, 9vw, 112px); line-height: .89; letter-spacing: -.075em; font-weight: 750; }
 h1 em { color: var(--mint); font-style: normal; }
 .lede { max-width: 420px; margin: 32px 0 34px; color: var(--muted); font-size: 17px; line-height: 1.5; }
-.download { display: inline-flex; align-items: center; justify-content: space-between; gap: 56px; min-width: 215px; padding: 16px 17px 16px 20px; color: var(--night); background: var(--mint); border: 1px solid var(--mint); border-radius: 2px 16px 2px 16px; text-decoration: none; font-weight: 760; transition: transform .2s ease, background .2s ease; }
+.download { display: inline-flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 270px; padding: 16px 17px 16px 20px; color: var(--night); background: var(--mint); border: 1px solid var(--mint); border-radius: 2px 16px 2px 16px; text-decoration: none; font-weight: 760; transition: transform .2s ease, background .2s ease; }
 .download:hover { transform: translate(3px, -3px); background: #c2f5e5; }
 .download:focus-visible { outline: 3px solid var(--amber); outline-offset: 4px; }
 .download[aria-disabled="true"] { cursor: not-allowed; opacity: .5; pointer-events: none; }
+.download-size { padding: 4px 7px; color: var(--night); background: rgba(11, 23, 33, .1); border-radius: 999px; font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; white-space: nowrap; }
 .download-arrow { font-size: 21px; }
 .download-meta { min-height: 17px; margin: 12px 0 0; color: var(--muted); text-transform: none; letter-spacing: 0; }
 

@@ -1,5 +1,6 @@
 const metaEl = document.querySelector("#release-meta");
 const button = document.querySelector("#download");
+const downloadSizeEl = document.querySelector("#download-size");
 const versionEl = document.querySelector("#card-version");
 const buildEl = document.querySelector("#card-build");
 const sizeEl = document.querySelector("#card-size");
@@ -23,7 +24,9 @@ async function loadRelease() {
     const release = await response.json();
     versionEl.textContent = release.version || "—";
     buildEl.textContent = String(release.version_code || "—");
-    sizeEl.textContent = formatBytes(release.size_bytes);
+    const formattedSize = formatBytes(release.size_bytes);
+    sizeEl.textContent = formattedSize;
+    downloadSizeEl.textContent = formattedSize;
     hashEl.textContent = release.sha256 ? `${release.sha256.slice(0, 12)}…` : "—";
     statusEl.textContent = "READY";
     button.href = release.download_url || "/api/v1/releases/latest/apk";

@@ -65,6 +65,17 @@ func TestUploadLatestAndDownload(t *testing.T) {
 	if download.Header.Get("Content-Type") != "application/vnd.android.package-archive" {
 		t.Fatalf("download content type = %q", download.Header.Get("Content-Type"))
 	}
+	head, err := http.Head(server.URL + meta.DownloadURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer head.Body.Close()
+	if head.StatusCode != http.StatusOK {
+		t.Fatalf("head status = %d, want %d", head.StatusCode, http.StatusOK)
+	}
+	if head.ContentLength != meta.SizeBytes {
+		t.Fatalf("head content length = %d, want %d", head.ContentLength, meta.SizeBytes)
+	}
 	if _, err := os.Stat(filepath.Join(store.dir, meta.Filename)); err != nil {
 		t.Fatalf("published file missing: %v", err)
 	}
