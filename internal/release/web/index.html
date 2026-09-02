@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hushi — удалённый терминал для агентских сессий.">
+  <title>Hushi — релизный канал</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <nav class="nav" aria-label="Главная навигация">
+      <a class="brand" href="/" aria-label="Hushi, на главную">
+        <span class="brand-mark" aria-hidden="true">⌁</span>
+        <span>HUSHI</span>
+      </a>
+      <span class="nav-note">release desk / 01</span>
+    </nav>
+
+    <section class="hero" aria-labelledby="title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="signal-dot"></span> канал обновлений</p>
+        <h1 id="title">Терминал,<br><em>в кармане.</em></h1>
+        <p class="lede">Hushi показывает рабочие пространства, вкладки и живые терминалы агентов прямо на Android.</p>
+        <a class="download" id="download" href="/api/v1/releases/latest/apk" aria-disabled="true">
+          <span>Скачать APK</span>
+          <span class="download-arrow" aria-hidden="true">↗</span>
+        </a>
+        <p class="download-meta" id="release-meta" role="status">Проверяю последний релиз…</p>
+      </div>
+
+      <div class="release-card" role="region" aria-label="Информация о текущем релизе">
+        <div class="card-top"><span>HUSHI / ANDROID</span><span id="card-status">STANDBY</span></div>
+        <div class="card-version" id="card-version">—</div>
+        <div class="card-rule"></div>
+        <div class="card-grid">
+          <span>BUILD</span><strong id="card-build">—</strong>
+          <span>SIZE</span><strong id="card-size">—</strong>
+          <span>SHA-256</span><strong class="hash" id="card-hash">—</strong>
+        </div>
+        <div class="card-footer">SECURE DELIVERY / PUBLIC DOWNLOAD</div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Hushi mobile companion</span>
+      <span>APK releases are signed by Android Installer</span>
+    </footer>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>
