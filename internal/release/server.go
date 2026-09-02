@@ -187,6 +187,9 @@ func (s *ServerStore) currentLocked() (serverEnvelope, error) {
 		if name != asset.Filename || !safeAssetName(name) || asset.SizeBytes <= 0 || len(asset.SHA256) != sha256.Size*2 {
 			return serverEnvelope{}, errors.New("invalid server release asset metadata")
 		}
+		if _, err := hex.DecodeString(asset.SHA256); err != nil {
+			return serverEnvelope{}, errors.New("invalid server release asset metadata")
+		}
 	}
 	return envelope, nil
 }

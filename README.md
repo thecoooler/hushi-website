@@ -30,6 +30,8 @@ Public endpoints:
 ```http
 GET /api/v1/releases/latest
 GET /api/v1/releases/latest/apk
+GET /api/v1/server/releases/latest
+GET /api/v1/server/releases/latest/<asset>
 ```
 
 Upload a release with the token in the `Authorization` header:
@@ -59,6 +61,25 @@ SHA-256, and publishes metadata like:
   "download_url": "/api/v1/releases/latest/apk"
 }
 ```
+
+Server binaries use the same upload token and are published as one complete
+release with repeated `asset` fields. The public installer uses this channel:
+
+```sh
+curl --fail-with-body \
+  -H "Authorization: Bearer $HUSHI_WEBSITE_UPLOAD_TOKEN" \
+  -F version=0.3.0 \
+  -F asset=@hushi-linux-amd64 \
+  -F asset=@hushi-linux-arm64 \
+  -F asset=@hushi-darwin-amd64 \
+  -F asset=@hushi-darwin-arm64 \
+  -F asset=@checksums.txt \
+  https://updates.example.com/api/v1/server/releases
+```
+
+The installer is available at `/install.sh`; it selects the platform binary,
+checks its SHA-256 against `checksums.txt`, installs `hushi`, and runs
+`hushi setup`.
 
 ## Production notes
 
