@@ -80,9 +80,11 @@ curl --fail-with-body \
 The installer is available at `/install.sh`; it selects the platform binary,
 checks its SHA-256 against `checksums.txt`, and installs `hushi`. The same
 command detects an existing installation and performs an update after asking
-for confirmation. It asks separately whether hourly automatic server updates
-should be enabled. For unattended use, set `HUSHI_YES=1` and explicitly set
-`HUSHI_AUTO_UPDATE=on` or `HUSHI_AUTO_UPDATE=off`.
+for confirmation. Automatic server updates are enabled by default and check
+for releases every minute. A candidate keeps the previous binary for a 15-
+second startup window; a failed start causes the service manager to load the
+previous binary. Set `HUSHI_AUTO_UPDATE=off` to disable updates during an
+unattended install.
 
 The landing page shows the canonical command and copies it to the clipboard:
 

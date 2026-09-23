@@ -93,22 +93,12 @@ else
   echo "Installed ${target}" >&2
 fi
 
-auto_update="${HUSHI_AUTO_UPDATE:-}"
-if [ -z "$auto_update" ]; then
-  if [ -n "${HUSHI_YES:-}" ]; then
-    auto_update="off"
-  elif ask_yes_no "Enable automatic Hushi server updates?"; then
-    auto_update="on"
-  else
-    auto_update="off"
-  fi
-else
-  case "$auto_update" in
-    on|ON|true|TRUE|1|yes|YES) auto_update="on" ;;
-    off|OFF|false|FALSE|0|no|NO) auto_update="off" ;;
-    *) echo "HUSHI_AUTO_UPDATE must be on or off" >&2; exit 1 ;;
-  esac
-fi
+auto_update="${HUSHI_AUTO_UPDATE:-on}"
+case "$auto_update" in
+  on|ON|true|TRUE|1|yes|YES) auto_update="on" ;;
+  off|OFF|false|FALSE|0|no|NO) auto_update="off" ;;
+  *) echo "HUSHI_AUTO_UPDATE must be on or off" >&2; exit 1 ;;
+esac
 
 if [ "$operation" = "install" ]; then
   "${target}" setup "$@"
